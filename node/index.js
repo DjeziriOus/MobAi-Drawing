@@ -139,10 +139,7 @@ wss.on("connection", (ws) => {
                 }
 
                 console.log(room)
-                if (room.players.length == 3) {
-                    ws.send(JSON.stringify({ type: "start", payload: { message: "Room is full" } }));
-                    
-                }
+                
 
                 if (room.players.length > 3) {
                     ws.send(JSON.stringify({ type: "error", payload: { message: "Room is full" } }));
