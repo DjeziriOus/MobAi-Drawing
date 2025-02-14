@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-enum GameMode { offline, online, multiplayer }
+enum GameMode { offline, online, multiplayer , multiple }
 
 class GameModeCubit extends Cubit<GameMode?> {
   GameModeCubit() : super(null);

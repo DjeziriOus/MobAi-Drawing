@@ -44,7 +44,7 @@ class WelcomeScreen extends StatelessWidget {
                     ModeButton(
                       icon: Icons.groups,
                       label: 'Multiplayer Room',
-                      onPressed: () => _navigateToMode(context, GameMode.multiplayer),
+                      onPressed: () => _navigateToMode(context, GameMode.multiple),
                     ),
                   ],
                 ),
@@ -67,6 +67,8 @@ class WelcomeScreen extends StatelessWidget {
         break;
       case GameMode.multiplayer:
         Navigator.pushNamed(context, '/multiplayer');
+      case GameMode.multiple:
+        Navigator.pushNamed(context, '/multiple');  
         break;
     }
   }
