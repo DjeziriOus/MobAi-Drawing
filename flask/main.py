@@ -5,6 +5,10 @@ app = Flask(__name__)
 application=app
 CORS(app)
 
+@app.post('/')
+   
+
+
 @app.route('/about')
 def route():
     return "hello world ça marche"

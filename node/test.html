@@ -3,55 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Socket.io</title>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <title>Test WebSocket</title>
 </head>
 <body>
-    <h1>Test Socket.io</h1>
-    <button onclick="playVs1()">Jouer 1v1</button>
-    <button onclick="createRoom()">Créer une salle</button>
-    <button onclick="joinRoom()">Rejoindre une salle</button>
-    <button onclick="sendData()">Envoyer des données</button>
-    <div id="messages"></div>
+    <h2>Test WebSocket</h2>
+    
+    <p><strong>Mon ID:</strong> <span id="clientId">En attente...</span></p>
+    
+    <label for="targetId">ID du destinataire :</label>
+    <input type="text" id="targetId" placeholder="Entrer ID du client">
+    
+    <label for="message">Message :</label>
+    <input type="text" id="message" placeholder="Votre message">
+    
+    <button onclick="sendMessage()">Envoyer</button>
+    
+    <h3>Messages reçus :</h3>
+    <ul id="messages"></ul>
 
     <script>
-        const socket = io("http://localhost:3000"); // Remplace par l'URL de ton serveur
+        const ws = new WebSocket("ws://localhost:5000");
+        let myId = null;
 
-        socket.on("connect", () => {
-            console.log("Connecté avec ID :", socket.id);
-        });
+        ws.onopen = () => {
+            console.log("Connecté au serveur WebSocket");
+        };
 
-        socket.on("message", (msg) => {
-            const div = document.createElement("div");
-            div.textContent = msg;
-            document.getElementById("messages").appendChild(div);
-        });
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
 
-        function playVs1() {
-            socket.emit("play_vs_1");
+            switch (data.type) {
+                case "welcome":
+                    myId = data.id;
+                    document.getElementById("clientId").textContent = myId;
+                    break;
+
+                case "private_message":
+                    displayMessage(`De ${data.from} : ${data.data}`);
+                    break;
+
+                case "error":
+                    displayMessage(`⚠️ Erreur: ${data.message}`);
+                    break;
+
+                default:
+                    console.log("Message inconnu :", data);
+            }
+        };
+
+        function sendMessage() {
+            const targetId = document.getElementById("targetId").value.trim();
+            const message = document.getElementById("message").value.trim();
+
+            if (!targetId || !message) {
+                alert("Veuillez remplir tous les champs !");
+                return;
+            }
+
+            ws.send(JSON.stringify({
+                type: "send_to_client",
+                targetId,
+                payload: message
+            }));
+
+            displayMessage(`📝 Envoyé à ${targetId} : ${message}`);
         }
 
-        function createRoom() {
-            socket.emit("create_room");
+        function displayMessage(msg) {
+            const li = document.createElement("li");
+            li.textContent = msg;
+            document.getElementById("messages").appendChild(li);
         }
-
-        function joinRoom() {
-            const roomId = prompt("Entrez l'ID de la salle :");
-            if (roomId) socket.emit("join_room", roomId);
-        }
-
-        function sendData() {
-            const data = { level: Math.floor(Math.random() * 10) };
-            socket.emit("send_data", data);
-        }
-
-        socket.on("party_created", (roomId) => {
-            alert("Salle créée avec ID : " + roomId.code);
-        });
-
-        socket.on("party_joined", (roomId) => {
-            alert("Rejoint la salle : " + roomId);
-        });
     </script>
 </body>
 </html>
