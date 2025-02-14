@@ -26,17 +26,20 @@ class MultipChoice extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    
                     const SizedBox(height: 60),
                     ModeButton(
                       icon: Icons.create,
                       label: 'Create room',
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>const RoomScreen()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => RoomScreen(
+                                      isCreator: true,
+                                    )));
                       },
                     ),
                     const SizedBox(height: 50),
-
                     const SizedBox(height: 20),
                     ModeButton(
                       icon: Icons.groups,
@@ -45,12 +48,14 @@ class MultipChoice extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            TextEditingController roomNameController = TextEditingController();
+                            TextEditingController roomNameController =
+                                TextEditingController();
                             return AlertDialog(
                               title: Text('Enter Room Name'),
                               content: TextField(
                                 controller: roomNameController,
-                                decoration: InputDecoration(hintText: "Room number"),
+                                decoration:
+                                    InputDecoration(hintText: "Room number"),
                               ),
                               actions: [
                                 TextButton(
@@ -65,6 +70,14 @@ class MultipChoice extends StatelessWidget {
                                     String roomName = roomNameController.text;
                                     // Handle the room name here
                                     Navigator.of(context).pop();
+                                     Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>  RoomScreen(
+                                      isCreator: false,
+                                      roomID: roomName,
+                                    )));
+
                                   },
                                 ),
                               ],

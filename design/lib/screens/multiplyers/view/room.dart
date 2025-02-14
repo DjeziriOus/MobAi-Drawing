@@ -5,22 +5,30 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RoomScreen extends StatelessWidget {
-  const RoomScreen({super.key});
+  RoomScreen({super.key, required this.isCreator,  this.roomID});
+
+  final bool isCreator;
+  String? roomID;
 
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
       backgroundColor: Colors.red,
       body: BlocProvider(
-        create: (context)=>RoomCubit(true, '2'),
+        create: (context)=>isCreator?RoomCubit(true, '2'):RoomCubit(false, '2',enteredRoomId: roomID),
         child: BlocConsumer<RoomCubit,RoomState>(
           
           builder:(context,state){
             final cubit = BlocProvider.of<RoomCubit>(context);
-            return Container(color: Colors.amber,);
+            return Container(
+              color: Colors.amber,
+              child:Text(cubit.roomId ?? 'No Room ID'),);
           } , 
           listener: (BuildContext context, RoomState state){
-            
+            if(state is EnterRoom){
+              print('roooooooom id');
+              print(state.roomID);
+            } 
           }),
         
         ),
