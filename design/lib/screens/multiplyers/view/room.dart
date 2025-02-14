@@ -15,7 +15,7 @@ class RoomScreen extends StatelessWidget {
     return  Scaffold(
       backgroundColor: Colors.red,
       body: BlocProvider(
-        create: (context)=>isCreator?RoomCubit(true, '2'):RoomCubit(false, '2',enteredRoomId: roomID),
+        create: (context)=>isCreator?RoomCubit(true, '7'):RoomCubit(false, '7',enteredRoomId: roomID),
         child: BlocConsumer<RoomCubit,RoomState>(
           
           builder:(context,state){
