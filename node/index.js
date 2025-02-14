@@ -54,6 +54,11 @@ async function insertPrompts() {
 // WebSocket Connections
 wss.on("connection", (ws) => {
     console.log("A user connected.");
+    
+    const testMessage = JSON.stringify({ type: "test", message: "Hello, client!" });
+    ws.send(testMessage);
+    console.log("Sent message to client:", testMessage);
+
 
     ws.on("message", async (message) => {
         try {
@@ -80,26 +85,31 @@ wss.on("connection", (ws) => {
 
             // Additional WebSocket events
             else if (data.type === "create_room") {
+                console.log(data)
+                
                 const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-                const room = await Room.create({ owner: { id: ws.id, score: 0, turn: true }, code: randomCode });
+                const room = await Room.create({ owner: { id: data.id, score: 0, turn: true }, code: randomCode });
                 ws.send(JSON.stringify({ type: "party_created", payload: { code: randomCode } }));
             }
 
             else if (data.type === "join_room") {
-                const { code } = data.payload;
-                const room = await Room.findOne({ code });
+                const code = data.payload;
 
+                const room = await Room.findOne({ code });
+                console.log(room)
                 if (!room) {
                     ws.send(JSON.stringify({ type: "error", payload: { message: "Room not found" } }));
                     return;
                 }
+
+                console.log(room)
 
                 if (room.players.length >= 3) {
                     ws.send(JSON.stringify({ type: "error", payload: { message: "Room is full" } }));
                     return;
                 }
 
-                room.players.push({ id: ws.id, score: 0, turn: false });
+                room.players.push({ id: data.id, score: 0, turn: false });
                 await room.save();
                 ws.send(JSON.stringify({ type: "party_joined", payload: { owner: room.owner, players: room.players } }));
             }
