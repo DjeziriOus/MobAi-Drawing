@@ -361,15 +361,6 @@ wss.on("connection", (ws) => {
                 const nextTurnIndex = (currentTurnIndex + 1) % players.length;
                 players[nextTurnIndex].turn = true;
     
-                // Notifier le joueur suivant que c'est son tour
-                if (clients.has(players[nextTurnIndex].id)) {
-                    clients.get(players[nextTurnIndex].id)?.send(JSON.stringify({
-                        type: "your_turn",
-                        data: { message: "C'est votre tour !" }
-                    }));
-                }
-    
-                // Vérifier si on est au dernier tour (retour au premier joueur)
                 if (nextTurnIndex === 0) {
                     const winner = players.reduce((best, player) => (player.score > best.score ? player : best), players[0]);
     
@@ -387,6 +378,17 @@ wss.on("connection", (ws) => {
                         }
                     });
                 }
+
+                // Notifier les joueurs le tour suivant
+                for(let client of clients) {
+                    client[1].get(players[nextTurnIndex].id)?.send(JSON.stringify({
+                        type: "your_turn",
+                        data: { nextTurn: players[nextTurnIndex].id }
+                    }));
+                }
+    
+                // Vérifier si on est au dernier tour (retour au premier joueur)
+                
     
                 // Sauvegarder les modifications
                 await room.save();
@@ -444,15 +446,17 @@ wss.on("connection", (ws) => {
     
             // Informer le joueur suivant
             const nextPlayer = clients.get(players[nextPlayerIndex].id);
-            if (nextPlayer) {
-                nextPlayer.send(JSON.stringify({ type: "your_turn", message: "C'est votre tour !" }));
+            for(let client of clients) {
+                client[1].get(players[nextTurnIndex].id)?.send(JSON.stringify({
+                    type: "your_turn",
+                    data: { nextTurn: players[nextTurnIndex].id }
+                }));
             }
     
             // Mettre à jour le score du joueur qui a dépassé le temps
-            players[currentPlayerIndex].score += 1;
+            
     
-            // Sauvegarder les modifications
-            await room.save();
+           
     
             // Informer tous les autres joueurs
             players.forEach(player => {
