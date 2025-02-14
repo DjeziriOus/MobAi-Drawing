@@ -190,10 +190,12 @@ wss.on("connection", (ws) => {
                 room.players.push({ id: data.id, score: 0, turn: false });
                 await room.save();
                 if (room.players.length == 4) {
-                    ws.send(JSON.stringify({ type: "start game",payload: { owner: room.owner, players: room.players }  }));
+                  for(let client of clients)
+                    client[1].send(JSON.stringify({ type: "start game",payload: { owner: room.owner, players: room.players }  }));
                     return;
                 }
-                ws.send(JSON.stringify({ type: "party_joined", payload: { owner: room.owner, players: room.players } }));
+                for(let client of clients)
+                    client[1].send(JSON.stringify({ type: "party_joined", payload: { owner: room.owner, players: room.players } }));
             }
             else if(data.type== "play_turn")
                 {
