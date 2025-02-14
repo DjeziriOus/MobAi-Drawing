@@ -174,8 +174,8 @@ wss.on("connection", (ws) => {
                         clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Erreur serveur" } }));
                     }
                 }
-                else if(type=="update_image")
-                {
+        else if(type=="update_image")
+         {
               try {
             const { id, image } = data; // Récupérer l'ID du joueur et l'image
     
@@ -218,17 +218,16 @@ wss.on("connection", (ws) => {
                 }
             });
     
-        } catch (error) {
-            console.error("Erreur lors de la mise à jour de l'image :", error);
-            clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Erreur serveur" } }));
-        }
+          } catch (error) {
+             console.error("Erreur lors de la mise à jour de l'image :", error);
+             clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Erreur serveur" } }));
+          }
         
-    
-              }
-              else if(type="guess")
-              {
+        }
+        else if(type="guess")
+         {
                 
-        try {
+           try {
             const { id, prompt } = data; // Récupérer l'ID du joueur et le mot deviné
     
             // Trouver la salle contenant le joueur ou le propriétaire
@@ -316,18 +315,16 @@ wss.on("connection", (ws) => {
                 clients.get(ws.id)?.send(JSON.stringify({ type: "wrong_guess", data: { message: "Mauvaise réponse, réessayez !" } }));
             }
     
-        } catch (error) {
-            console.error("Erreur lors du traitement du guess :", error);
-            clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Erreur serveur" } }));
-        }
-        
+            } catch (error) {
+               console.error("Erreur lors du traitement du guess :", error);
+               clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Erreur serveur" } }));
+            }
+          }
     
-              }
-    
-              else if (type="timeout")
-              {
+        else if (type="timeout")
+        {
                 
-        try {
+           try {
             const id = data.id; // ID du joueur qui a dépassé le temps
     
             // Trouver la salle où ce joueur est owner ou player
@@ -390,13 +387,11 @@ wss.on("connection", (ws) => {
                 }
             });
     
-        } catch (error) {
-            console.error("Erreur lors du changement de tour :", error);
-            ws.send(JSON.stringify({ type: "error", message: "Erreur serveur" }));
-        }
-        
-    
-              }
+            } catch (error) {
+               console.error("Erreur lors du changement de tour :", error);
+               ws.send(JSON.stringify({ type: "error", message: "Erreur serveur" }));
+            }
+         }
         } catch (error) {
             console.error("Error handling message:", error);
             ws.send(JSON.stringify({ type: "error", payload: { message: "Server error" } }));
