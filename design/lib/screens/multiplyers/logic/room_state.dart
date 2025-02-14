@@ -19,5 +19,11 @@ class RoomErr extends RoomState{
 
 class RoomLeave extends RoomState {}
 
+class StartGame extends RoomState {
+  final String roomID;
+
+  StartGame({required this.roomID});
+}
+
 
 

@@ -16,7 +16,10 @@ class RoomCubit extends Cubit<RoomState> {
       if (data == 'disconnect') {
         print('Disconnected from the server.');
         emit(RoomLeave());
-      } else {
+      }else if(data=='game start'){
+        
+      }
+       else {
         handleServerResponse(data);
       }
     });
@@ -79,7 +82,10 @@ class RoomCubit extends Cubit<RoomState> {
       } else if (!isCreator && data['message'] != null) {
         // Joined room successfully
         emit(EnterRoom(isCreator: false, roomID: roomId!));
+      }else if (data['type']=='start game'){
+        emit(StartGame(roomID: roomId!));
       }
+
     } else {
       emit(RoomErr(err: 'Unexpected server response.'));
     }

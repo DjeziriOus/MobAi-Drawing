@@ -103,6 +103,10 @@ wss.on("connection", (ws) => {
                 }
 
                 console.log(room)
+                if (room.players.length == 3) {
+                    ws.send(JSON.stringify({ type: "start", payload: { message: "Room is full" } }));
+                    
+                }
 
                 if (room.players.length >= 3) {
                     ws.send(JSON.stringify({ type: "error", payload: { message: "Room is full" } }));
@@ -111,6 +115,10 @@ wss.on("connection", (ws) => {
 
                 room.players.push({ id: data.id, score: 0, turn: false });
                 await room.save();
+                if (room.players.length == 4) {
+                    ws.send(JSON.stringify({ type: "start game" }));
+                    return;
+                }
                 ws.send(JSON.stringify({ type: "party_joined", payload: { owner: room.owner, players: room.players } }));
             }
         } catch (error) {

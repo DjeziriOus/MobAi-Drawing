@@ -29,6 +29,10 @@ class RoomScreen extends StatelessWidget {
               print('roooooooom id');
               print(state.roomID);
             } 
+            if (state is StartGame){
+              print('Start the game');
+              print(state.roomID);
+            }
           }),
         
         ),
