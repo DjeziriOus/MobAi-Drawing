@@ -40,8 +40,9 @@ class GustsScreen extends StatelessWidget {
                   labelText: 'Describe what you see',
                   ),
                   onChanged: (value) {
-                  
+                  context.read<GameCubit>().sendGuess(value);
                   },
+                
                 ),
                 ),
                 ElevatedButton(
