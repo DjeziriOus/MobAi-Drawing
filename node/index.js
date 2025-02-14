@@ -118,7 +118,7 @@ wss.on("connection", (ws) => {
 
 
                 ws.send(response);
-                ws.send(response);
+                
                 if (clients.has(item2.id)) {
                     clients.get(item2.id).send(response); // Envoie aussi au deuxième joueur
                  } // Envoie aussi au deuxième joueur
