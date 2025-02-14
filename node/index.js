@@ -87,7 +87,7 @@ wss.on("connection", (ws) => {
 
                 ws.send(JSON.stringify({ type: "message", payload: responseData }));
             }
-            else if(data.type==="1vs1")
+            else if(data.type=="1vs1")
             {
                 let item = await Item.findOne({ id:data.id });
 
@@ -124,7 +124,7 @@ wss.on("connection", (ws) => {
                  } // Envoie aussi au deuxième joueur
             }
 
-            else if (data.type="success")
+            else if (data.type=="success")
             {
                 let item2 = await Item.findOne({ id: { $ne: data.id } });
                 let party = await Party.updateOne(
@@ -142,7 +142,7 @@ wss.on("connection", (ws) => {
                 clients.get(item2.id).send(JSON.stringify({ type: "you lose", payload: { message: "Party finished" } }))
             }
 
-            else if (data.type="timeout_draw")
+            else if (data.type=="timeout_draw")
                 {
                     let item2 = await Item.findOne({ id: { $ne: data.id } });
                     let party = await Party.updateOne(
@@ -161,8 +161,9 @@ wss.on("connection", (ws) => {
                 }
 
             // Additional WebSocket events
-            else if (data.type === "create_room") {
+            else if (data.type == "create_room") {
                 console.log(data)
+                console.log('aaaaaaaaaaaaaaaaaa')
                 
                 const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
                 const room = await Room.create({ owner: { id: data.id, score: 0, turn: true }, code: randomCode });
@@ -182,14 +183,14 @@ wss.on("connection", (ws) => {
                 console.log(room)
                 
 
-                if (room.players.length > 3) {
+                if (room.players.length > 0) {
                     ws.send(JSON.stringify({ type: "error", payload: { message: "Room is full" } }));
                     return;
                 }
 
                 room.players.push({ id: data.id, score: 0, turn: false });
                 await room.save();
-                if (room.players.length == 4) {
+                if (room.players.length == 1) {
                   for(let client of clients)
                     client[1].send(JSON.stringify({ type: "start game",payload: { owner: room.owner, players: room.players }  }));
                     return;
@@ -251,10 +252,11 @@ wss.on("connection", (ws) => {
                         clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Erreur serveur" } }));
                     }
                 }
-        else if(data.type=="update_image")
+        else if(data.type=="send svg")
          {
               try {
-            const { id, image } = data; // Récupérer l'ID du joueur et l'image
+            const id = data.id // Récupérer l'ID du joueur et l'image
+            const svg = data.svg
     
             // Trouver la salle contenant le joueur ou le propriétaire
             const room = await Room.findOne({
@@ -289,8 +291,9 @@ wss.on("connection", (ws) => {
             players.forEach(player => {
                 if (player.id !== id && clients.has(player.id)) {
                     clients.get(player.id)?.send(JSON.stringify({
-                        type: "updated_image",
-                        data: { image }
+                        type: "send svg",
+                        svg: svg,
+                        sid:id
                     }));
                 }
             });
@@ -301,7 +304,7 @@ wss.on("connection", (ws) => {
           }
         
         }
-        else if(data.type==="guess")
+        else if(data.type=="guess")
          {
                 
            try {
@@ -398,7 +401,7 @@ wss.on("connection", (ws) => {
             }
           }
     
-        else if (data.type="timeout")
+        else if (data.type=="timeout")
         {
                 
            try {
