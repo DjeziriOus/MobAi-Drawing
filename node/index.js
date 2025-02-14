@@ -171,6 +171,7 @@ io.on("connection", (socket) => {
 
         let item2= await Item.findOne({level,id: { $ne: id }} )
         
+        
     })
 
     socket.on("disconnect", () => {

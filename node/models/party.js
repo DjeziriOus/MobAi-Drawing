@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const partySchema = new mongoose.Schema({
     id1: { type: String, required: true, unique: true }, // ID unique
     id2: { type: String, required: true, unique: true }, // ID unique
+    state:{ type: String, default:"open" }, 
     
 });
 
