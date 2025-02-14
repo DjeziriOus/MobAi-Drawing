@@ -100,8 +100,7 @@ wss.on("connection", (ws) => {
 
                 await Item.findOneAndUpdate(
                     { id:data.id },
-                    { level },
-                    { new: true }
+                    { available: true }
                 );
 
                 let item2 = await Item.findOne({ level, id: { $ne: data.id } });
@@ -111,6 +110,12 @@ wss.on("connection", (ws) => {
                 let party = await Party.create({ id1: item.id, id2: item2.id });
 
                 const response = JSON.stringify({ type: "1vs_response", party });
+                item.available=false
+                item2.available=false
+
+                item.save()
+                item2.save()
+
 
                 ws.send(response);
                 ws.send(response);
@@ -118,6 +123,42 @@ wss.on("connection", (ws) => {
                     clients.get(item2.id).send(response); // Envoie aussi au deuxième joueur
                  } // Envoie aussi au deuxième joueur
             }
+
+            else if (data.type="success")
+            {
+                let item2 = await Item.findOne({ id: { $ne: data.id } });
+                let party = await Party.updateOne(
+                    { 
+                        $or: [
+                            { $and: [ { id1: item2.id }, { id2: data.id }, { state: "open" } ] },
+                            { $and: [ { id1: data.id }, { id2: item2.id }, { state: "open" } ] }
+                        ]
+                    },
+                    { $set: { state: "finished" } }
+                );
+                if(!party) ws.send(JSON.stringify({ type: "error", payload: { message: "Party not available" } }));
+
+                ws.send(JSON.stringify({ type: "you win", payload: { message: "Party finished" } }))
+                clients.get(item2.id).send(JSON.stringify({ type: "you lose", payload: { message: "Party finished" } }))
+            }
+
+            else if (data.type="timeout_draw")
+                {
+                    let item2 = await Item.findOne({ id: { $ne: data.id } });
+                    let party = await Party.updateOne(
+                        { 
+                            $or: [
+                                { $and: [ { id1: item2.id }, { id2: data.id }, { state: "open" } ] },
+                                { $and: [ { id1: data.id }, { id2: item2.id }, { state: "open" } ] }
+                            ]
+                        },
+                        { $set: { state: "finished" } }
+                    );
+                    if(!party) ws.send(JSON.stringify({ type: "error", payload: { message: "Party not available" } }));
+    
+                    ws.send(JSON.stringify({ type: "draw", payload: { message: "Party finished" } }))
+                    clients.get(item2.id).send(JSON.stringify({ type: "draw", payload: { message: "Party finished" } }))
+                }
 
             // Additional WebSocket events
             else if (data.type === "create_room") {
