@@ -34,7 +34,7 @@ class RoomCubit extends Cubit<RoomState> {
 
   void setSocket() {
     channel = WebSocketChannel.connect(
-      Uri.parse('ws://10.80.4.193:8000'),
+      Uri.parse('ws://localhost:8000'),
     );
     connectAndListen();
     if(isCreator){
@@ -83,7 +83,14 @@ class RoomCubit extends Cubit<RoomState> {
         // Joined room successfully
         emit(EnterRoom(isCreator: false, roomID: roomId!));
       }else if (data['type']=='start game'){
-        emit(StartGame(roomID: roomId!));
+        bool isDrawer = false;
+        dynamic payload = data['payload'];
+        dynamic oid = payload['owner']['id'];
+        if (oid==uid){
+          isDrawer = true;
+        }
+
+        emit(StartGame(roomID: roomId!, isDrawer: isDrawer,streamSocket:streamSocket,channel: channel,uid:uid));
       }
 
     } else {
@@ -95,7 +102,7 @@ class RoomCubit extends Cubit<RoomState> {
   void createRoomID({String type = 'create_room'}) {
     final message = {
       'type': type,
-      'id':10
+      'id':uid
     };
     channel.sink.add(jsonEncode(message));
   }
