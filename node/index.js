@@ -68,7 +68,7 @@ wss.on("connection", (ws) => {
         try {
             const data = JSON.parse(message);
             clients.set(data.id, ws);
-            console.log("Received message:", data);
+  
 
             if (data.type === "send_data") {
                 const { time, accuracy, action } = data.payload;
@@ -309,6 +309,7 @@ wss.on("connection", (ws) => {
                 
            try {
             const { id, guess } = data; // Récupérer l'ID du joueur et le mot deviné
+            console.log(guess)
     
             // Trouver la salle contenant le joueur ou le propriétaire
             const room = await Room.findOne({
@@ -341,18 +342,23 @@ wss.on("connection", (ws) => {
     
             // Vérifier si la réponse est correcte
             if (room.prompt === data.guess) {
+                console.log(data.guess)
                 // Incrémenter le score du joueur gagnant
-                players[currentPlayerIndex].score += 1;
+                console.log('qqqqqqqqqqqqqqqqqqqqq')
     
                 // Notifier tout le monde que le joueur a trouvé la bonne réponse
                 players.forEach(player => {
-                    if (clients.has(player.id)) {
-                        clients.get(player.id)?.send(JSON.stringify({
-                            type: "player_won",
-                            data: { id, message: `Le joueur ${id} a trouvé la bonne réponse !` }
-                        }));
+                    if (player.id !== id) {
+                        const playerWs = clients.get(player.id);
+                        if (playerWs) {
+                            playerWs.send(JSON.stringify({ 
+                                type: "player_won", 
+                                id:id
+                            }));
+                        }
                     }
                 });
+
                 return
                 // Passer le tour au joueur suivant
                 /*const currentTurnIndex = players.findIndex(player => player.turn);
@@ -394,7 +400,7 @@ wss.on("connection", (ws) => {
                 await room.save();*/
             } else {
                 // Mauvaise réponse
-                clients.get(ws.id)?.send(JSON.stringify({ type: "wrong_guess", data: { message: "Mauvaise réponse, réessayez !" } }));
+                ws.send(JSON.stringify({ type: "wrong_guess", id:id }));
             }
     
             } catch (error) {
@@ -434,10 +440,10 @@ wss.on("connection", (ws) => {
             }
     
             // Vérifier si c'est bien SON tour
-            if (!players[currentPlayerIndex].turn) {
-                ws.send(JSON.stringify({ type: "error", message: "Ce n'est pas votre tour" }));
-                return;
-            }
+            // if (!players[currentPlayerIndex].turn) {
+            //     ws.send(JSON.stringify({ type: "error", message: "Ce n'est pas votre tour" }));
+            //     return;
+            // }
     
             /*// Passer le tour au joueur suivant
             players[currentPlayerIndex].turn = false; // Retirer le tour du joueur actuel
