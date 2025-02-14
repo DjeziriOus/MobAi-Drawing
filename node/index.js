@@ -3,6 +3,8 @@ const { createServer } = require("http");
 const { WebSocketServer } = require("ws");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { v4: uuidv4 } = require("uuid");
+
 
 const Item = require("./models/Item");
 const Prompt = require("./models/prompt");
@@ -10,7 +12,7 @@ const Party = require("./models/party");
 const Room = require("./models/room");
 
 const app = express();
-
+const clients = new Map();
 
 // MongoDB Connection
 mongoose.connect("mongodb://admin:secret@localhost:27017/mydb?authSource=admin", {
@@ -54,7 +56,9 @@ async function insertPrompts() {
 // WebSocket Connections
 wss.on("connection", (ws) => {
     console.log("A user connected.");
+    ws.id = uuidv4();
     
+
     const testMessage = JSON.stringify({ type: "test", message: "Hello, client!" });
     ws.send(testMessage);
     console.log("Sent message to client:", testMessage);
@@ -63,6 +67,7 @@ wss.on("connection", (ws) => {
     ws.on("message", async (message) => {
         try {
             const data = JSON.parse(message);
+            clients.set(data.id, ws);
             console.log("Received message:", data);
 
             if (data.type === "send_data") {
@@ -82,7 +87,7 @@ wss.on("connection", (ws) => {
 
                 ws.send(JSON.stringify({ type: "message", payload: responseData }));
             }
-            else if(data.type="1vs1")
+            else if(data.type==="1vs1")
             {
                 let item = await Item.findOne({ id:data.id });
 
@@ -108,7 +113,10 @@ wss.on("connection", (ws) => {
                 const response = JSON.stringify({ type: "1vs_response", party });
 
                 ws.send(response);
-                .ws.send(response); // Envoie aussi au deuxième joueur
+                ws.send(response);
+                if (clients.has(item2.id)) {
+                    clients.get(item2.id).send(response); // Envoie aussi au deuxième joueur
+                 } // Envoie aussi au deuxième joueur
             }
 
             // Additional WebSocket events
@@ -163,6 +171,7 @@ wss.on("connection", (ws) => {
                         });
                 
                         if (!room) {
+
                             clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Salle introuvable" } }));
                             return;
                         }
@@ -252,7 +261,7 @@ wss.on("connection", (ws) => {
           }
         
         }
-        else if(data.type="guess")
+        else if(data.type==="guess")
          {
                 
            try {
