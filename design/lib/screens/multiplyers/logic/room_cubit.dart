@@ -102,7 +102,8 @@ class RoomCubit extends Cubit<RoomState> {
   void createRoomID({String type = 'create_room'}) {
     final message = {
       'type': type,
-      'id':uid
+      'id':uid,
+      'prompt':'circle'
     };
     channel.sink.add(jsonEncode(message));
   }

@@ -37,7 +37,7 @@ class GameCubit extends Cubit<GameState>{
         if (data['type']=='send svg'){
           String sid = data['sid'];
           if (sid!=uid){
-            print('rrrrrrrrrrrrppppppppppppppppppppppppppppppppppppppppp');
+            
             String img = data['svg'];
             emit(GameReceivePic(svg_img: img ));
           }
@@ -46,6 +46,16 @@ class GameCubit extends Cubit<GameState>{
     } else {
       emit(GameErr(err: 'Unexpected server response.'));
     }
+  }
+
+  void sendGuess(String guess){
+
+    final message = {
+      'type':'guess',
+      'guess':guess,
+      'id':uid
+    };
+    channel.sink.add(jsonEncode(message));
   }
 
   void sendSVG(String svg_file,{String action = 'send svg'}){
