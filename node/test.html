@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Socket.io</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Test Socket.io</h1>
+    <button onclick="playVs1()">Jouer 1v1</button>
+    <button onclick="createRoom()">Créer une salle</button>
+    <button onclick="joinRoom()">Rejoindre une salle</button>
+    <button onclick="sendData()">Envoyer des données</button>
+    <div id="messages"></div>
+
+    <script>
+        const socket = io("http://localhost:3000"); // Remplace par l'URL de ton serveur
+
+        socket.on("connect", () => {
+            console.log("Connecté avec ID :", socket.id);
+        });
+
+        socket.on("message", (msg) => {
+            const div = document.createElement("div");
+            div.textContent = msg;
+            document.getElementById("messages").appendChild(div);
+        });
+
+        function playVs1() {
+            socket.emit("play_vs_1");
+        }
+
+        function createRoom() {
+            socket.emit("create_room");
+        }
+
+        function joinRoom() {
+            const roomId = prompt("Entrez l'ID de la salle :");
+            if (roomId) socket.emit("join_room", roomId);
+        }
+
+        function sendData() {
+            const data = { level: Math.floor(Math.random() * 10) };
+            socket.emit("send_data", data);
+        }
+
+        socket.on("party_created", (roomId) => {
+            alert("Salle créée avec ID : " + roomId.code);
+        });
+
+        socket.on("party_joined", (roomId) => {
+            alert("Rejoint la salle : " + roomId);
+        });
+    </script>
+</body>
+</html>
