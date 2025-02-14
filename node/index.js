@@ -439,7 +439,7 @@ wss.on("connection", (ws) => {
                 return;
             }
     
-            // Passer le tour au joueur suivant
+            /*// Passer le tour au joueur suivant
             players[currentPlayerIndex].turn = false; // Retirer le tour du joueur actuel
             let nextPlayerIndex = (currentPlayerIndex + 1) % players.length; // Déterminer le joueur suivant
             players[nextPlayerIndex].turn = true; // Donner le tour au suivant
@@ -452,7 +452,7 @@ wss.on("connection", (ws) => {
                     data: { nextTurn: players[nextTurnIndex].id }
                 }));
             }
-    
+    */
             // Mettre à jour le score du joueur qui a dépassé le temps
             
     
