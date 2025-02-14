@@ -82,7 +82,34 @@ wss.on("connection", (ws) => {
 
                 ws.send(JSON.stringify({ type: "message", payload: responseData }));
             }
-            
+            else if(data.type="1vs1")
+            {
+                let item = await Item.findOne({ id:data.id });
+
+                
+
+                if (!item) {
+                    item = new Item({ id:data.id, level: 0 });
+                    await item.save();
+                }
+
+                await Item.findOneAndUpdate(
+                    { id:data.id },
+                    { level },
+                    { new: true }
+                );
+
+                let item2 = await Item.findOne({ level, id: { $ne: data.id } });
+
+                if (!item2) return;
+
+                let party = await Party.create({ id1: item.id, id2: item2.id });
+
+                const response = JSON.stringify({ type: "1vs_response", party });
+
+                ws.send(response);
+                .ws.send(response); // Envoie aussi au deuxième joueur
+            }
 
             // Additional WebSocket events
             else if (data.type === "create_room") {
