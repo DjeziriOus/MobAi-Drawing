@@ -82,6 +82,7 @@ wss.on("connection", (ws) => {
 
                 ws.send(JSON.stringify({ type: "message", payload: responseData }));
             }
+            
 
             // Additional WebSocket events
             else if (data.type === "create_room") {
@@ -121,7 +122,7 @@ wss.on("connection", (ws) => {
                 }
                 ws.send(JSON.stringify({ type: "party_joined", payload: { owner: room.owner, players: room.players } }));
             }
-            else if(type== "play_turn")
+            else if(data.type== "play_turn")
                 {
                     try {
                         const { id, prompt } = data; // Récupérer l'ID du joueur et le prompt
@@ -174,7 +175,7 @@ wss.on("connection", (ws) => {
                         clients.get(ws.id)?.send(JSON.stringify({ type: "error", data: { message: "Erreur serveur" } }));
                     }
                 }
-        else if(type=="update_image")
+        else if(data.type=="update_image")
          {
               try {
             const { id, image } = data; // Récupérer l'ID du joueur et l'image
@@ -224,7 +225,7 @@ wss.on("connection", (ws) => {
           }
         
         }
-        else if(type="guess")
+        else if(data.type="guess")
          {
                 
            try {
@@ -321,7 +322,7 @@ wss.on("connection", (ws) => {
             }
           }
     
-        else if (type="timeout")
+        else if (data.type="timeout")
         {
                 
            try {
