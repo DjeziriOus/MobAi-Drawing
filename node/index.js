@@ -308,7 +308,7 @@ wss.on("connection", (ws) => {
          {
                 
            try {
-            const { id, prompt } = data; // Récupérer l'ID du joueur et le mot deviné
+            const { id, guess } = data; // Récupérer l'ID du joueur et le mot deviné
     
             // Trouver la salle contenant le joueur ou le propriétaire
             const room = await Room.findOne({
@@ -340,7 +340,7 @@ wss.on("connection", (ws) => {
             }
     
             // Vérifier si la réponse est correcte
-            if (room.prompt === prompt) {
+            if (room.prompt === data.guess) {
                 // Incrémenter le score du joueur gagnant
                 players[currentPlayerIndex].score += 1;
     
@@ -353,9 +353,9 @@ wss.on("connection", (ws) => {
                         }));
                     }
                 });
-    
+                return
                 // Passer le tour au joueur suivant
-                const currentTurnIndex = players.findIndex(player => player.turn);
+                /*const currentTurnIndex = players.findIndex(player => player.turn);
                 players[currentTurnIndex].turn = false;
     
                 const nextTurnIndex = (currentTurnIndex + 1) % players.length;
@@ -391,7 +391,7 @@ wss.on("connection", (ws) => {
                 
     
                 // Sauvegarder les modifications
-                await room.save();
+                await room.save();*/
             } else {
                 // Mauvaise réponse
                 clients.get(ws.id)?.send(JSON.stringify({ type: "wrong_guess", data: { message: "Mauvaise réponse, réessayez !" } }));
