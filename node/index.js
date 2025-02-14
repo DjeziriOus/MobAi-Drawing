@@ -165,7 +165,7 @@ wss.on("connection", (ws) => {
                 console.log(data)
                 
                 const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-                const room = await Room.create({ owner: { id: data.id, score: 0, turn: true }, code: randomCode });
+                const room = await Room.create({ owner: { id: data.id, score: 0, turn: true }, code: randomCode ,prompt:data.prompt});
                 ws.send(JSON.stringify({ type: "party_created", payload: { code: randomCode } }));
             }
 
