@@ -1,5 +1,7 @@
 import 'package:design/screens/multiplyers/logic/room_cubit.dart';
 import 'package:design/screens/multiplyers/logic/room_state.dart';
+import 'package:design/screens/multiplyers/view/drawer_screen.dart';
+import 'package:design/screens/multiplyers/view/gusts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,22 +11,28 @@ class RoomScreen extends StatelessWidget {
 
   final bool isCreator;
   String? roomID;
+  late RoomCubit cc ;
 
   @override
   Widget build(BuildContext context) {
+    
     return  Scaffold(
       backgroundColor: Colors.red,
       body: BlocProvider(
-        create: (context)=>isCreator?RoomCubit(true, '7'):RoomCubit(false, '7',enteredRoomId: roomID),
+        create: (context)=>isCreator?RoomCubit(true, '101'):RoomCubit(false, '101',enteredRoomId: roomID),
         child: BlocConsumer<RoomCubit,RoomState>(
+          
           
           builder:(context,state){
             final cubit = BlocProvider.of<RoomCubit>(context);
+            cc = cubit;
+            
             return Container(
               color: Colors.amber,
               child:Text(cubit.roomId ?? 'No Room ID'),);
           } , 
           listener: (BuildContext context, RoomState state){
+            
             if(state is EnterRoom){
               print('roooooooom id');
               print(state.roomID);
@@ -32,6 +40,16 @@ class RoomScreen extends StatelessWidget {
             if (state is StartGame){
               print('Start the game');
               print(state.roomID);
+              bool _isDrawer = state.isDrawer;
+              if(_isDrawer){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> DrawerScreen(
+                  socket: state.streamSocket, channel: state.channel, uid: state.uid,
+                  
+                  )));
+              }else{
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>GustsScreen(
+                  channel: cc.channel, streamSocket: cc.streamSocket, uid: cc.uid,)));
+              }
             }
           }),
         
