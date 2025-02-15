@@ -35,13 +35,15 @@ class OnevsoneCubit  extends Cubit<OnevsoneState>{
 
     void setSocket() {
     channel = WebSocketChannel.connect(
-      Uri.parse('ws://localhost:8000'),
+      Uri.parse('ws://localhost:3000'),
     );
     connectAndListen();
     find_room();
   }
 
   void sendSVG(String svg_file,{String action = 'send pic'}){
+    print('sssssssssssenennnnnnnnnnnnnnnnnnnd');
+    print(svg_file);
 
     final message = {
       'type':action,
@@ -59,10 +61,11 @@ class OnevsoneCubit  extends Cubit<OnevsoneState>{
     channel.sink.add(jsonEncode(message));
   }
 
-  void announceWin({String type='loser'}){
+  void announceWin({String type='success'}){
     final message = {
       'type': type,
-      'lid':ucm,
+      'id':uid,
+      'lid':ucm
     };
     channel.sink.add(jsonEncode(message));
   }
@@ -96,16 +99,16 @@ class OnevsoneCubit  extends Cubit<OnevsoneState>{
     if (isClosed) return; // Prevent emitting after close
 
     if (data is Map<String, dynamic>) {
-      if (data['type'] == 'create room') {
-         ucm = data['id1']==uid?data['id2']:data['id1'];
-         prompt = data['prompt'];
+      if (data['type'] == '1vs_response') {
+         ucm = data['party']['id1']==uid?data['party']['id2']:data['party']['id1'];
+         prompt = data['party']['prompt'];
         print('sssssssssssssssssssssssssssss');
         emit(OnevsOneStart(prompt: prompt, ucm: ucm));
         
         
        
-      } else if (data['type'] == 'result') {
-        String imgClass = data['class'];
+      } else if (data['type'] == 'ai_guessed') {
+        String imgClass = data['guess'];
         if (imgClass == prompt) {
             announceWin();
           emit(OnevsOneWin());

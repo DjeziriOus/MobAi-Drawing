@@ -3,6 +3,9 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 import cv2
 import numpy as np
 from tensorflow import keras
+from io import BytesIO
+from PIL import Image
+import cairosvg
 
 app = FastAPI()
 
@@ -39,6 +42,7 @@ def preprocess_image(image: np.ndarray, image_size: int = 28) -> np.ndarray:
     except Exception as e:
         raise ValueError(f"Error in preprocessing image: {e}")
 
+
 @app.post("/predict")
 async def predict_sketch(file: UploadFile = File(...)) -> Dict:
     """
@@ -51,33 +55,44 @@ async def predict_sketch(file: UploadFile = File(...)) -> Dict:
         Dict: A dictionary containing the prediction results.
     """
     try:
-        # Read the file content
+        # Read file content once
         contents = await file.read()
 
-        # Convert the file content to a NumPy array
-        nparr = np.frombuffer(contents, np.uint8)
+        # Check the file type
+        if file.content_type == "image/svg+xml":
+            # Convert SVG to PNG
+            png_image = cairosvg.svg2png(bytestring=contents)
 
-        # Decode the image
-        image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+            # Open the PNG image with PIL and convert to grayscale
+            pil_image = Image.open(BytesIO(png_image)).convert("L")
+
+            # Convert PIL image to NumPy array
+            image = np.array(pil_image)
+        else:
+            # Handle raster images (e.g., JPG, PNG)
+            nparr = np.frombuffer(contents, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+
+        # If the image couldn't be decoded or converted, raise an error
         if image is None:
             raise HTTPException(status_code=400, detail="Invalid image file")
 
         # Process the image
         processed_sketch = preprocess_image(image)
 
-        # Make prediction
+        # Make a prediction
         predictions = model.predict(processed_sketch)
 
         # Get prediction results
         predicted_class_index = int(np.argmax(predictions))
         confidence = float(predictions[0][predicted_class_index])
 
-        # Prepare response
+        # Prepare the response
         response = {
             "filename": file.filename,
             "predicted_class": predicted_class_index,
             "confidence": confidence,
-            "class_index": predicted_class_index
+            "class_index": predicted_class_index,
         }
 
         return response
