@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/offline': (context) => const OfflineGameScreen(),
-        '/online': (context) => const OnlineGameScreen(),
+        '/online': (context) =>  OnlineGameScreen(),
         '/multiplayer': (context) => const MultiplayerRoomScreen(),
         '/multiple':(context)=> const MultipChoice()
       },
