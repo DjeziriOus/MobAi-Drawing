@@ -34,7 +34,7 @@ class RoomCubit extends Cubit<RoomState> {
 
   void setSocket() {
     channel = WebSocketChannel.connect(
-      Uri.parse('ws://localhost:8000'),
+      Uri.parse('ws://localhost:3000'),
     );
     connectAndListen();
     if(isCreator){

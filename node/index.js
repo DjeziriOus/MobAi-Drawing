@@ -4,12 +4,15 @@ const { WebSocketServer } = require("ws");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
-const sharp = require("sharp");
+const fs = require('fs');
+
 
 const Item = require("./models/Item");
 const Prompt = require("./models/prompt");
 const Party = require("./models/party");
 const Room = require("./models/room");
+
+const axios = require('axios');
 
 const app = express();
 const clients = new Map();
@@ -201,12 +204,12 @@ wss.on("connection", (ws) => {
                
             }
             
-            else if(data.type=="1vs1")
+            else if(data.type=="find room")
             {
                 let item = await Item.findOne({ id:data.id });
 
                 const randomIndex = Math.floor(Math.random() * promptsData.length);
-                const prompt= promptsData[randomIndex];
+                const prompt= promptsData[randomIndex].prompt;
 
                 if (!item) {
                     item = new Item({ id:data.id, level: 0 });
@@ -218,7 +221,7 @@ wss.on("connection", (ws) => {
                     { available: true }
                 );
 
-                let item2 = await Item.findOne({ level, id: { $ne: data.id },available:true });
+                let item2 = await Item.findOne({ level:item.level, id: { $ne: data.id },available:true });
 
                 if (!item2) return;
 
@@ -239,9 +242,10 @@ wss.on("connection", (ws) => {
                  } // Envoie aussi au deuxième joueur
             }
 
-            else if (data.type=="get_image")
+            else if (data.type=="send pic")
             {
-                const {image}=data.image
+                const image=data.svg
+                
 
                 const imagePath = 'image_recue.svg';
         fs.writeFileSync(imagePath, image);
@@ -252,7 +256,7 @@ wss.on("connection", (ws) => {
         formData.append('file', fs.createReadStream(imagePath));
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/predict/', formData, {
+            const response = await axios.post('http://127.0.0.1:8000/predict', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             console.log('Réponse de FastAPI:', response.data);
@@ -263,12 +267,12 @@ wss.on("connection", (ws) => {
             }
             else if (data.type=="success")
             {
-                let item2 = await Item.findOne({ id: { $ne: data.id } });
+                let item2 = await Item.findOne({ id:data.lid});
                 let party = await Party.updateOne(
                     { 
                         $or: [
-                            { $and: [ { id1: item2.id }, { id2: data.id }, { state: "open" } ] },
-                            { $and: [ { id1: data.id }, { id2: item2.id }, { state: "open" } ] }
+                            { $and: [ { id1: data.lid }, { id2: data.id }, { state: "open" } ] },
+                            { $and: [ { id1: data.id }, { id2: data.lid }, { state: "open" } ] }
                         ]
                     },
                     { $set: { state: "finished" } }
@@ -276,7 +280,7 @@ wss.on("connection", (ws) => {
                 if(!party) ws.send(JSON.stringify({ type: "error", payload: { message: "Party not available" } }));
 
                 ws.send(JSON.stringify({ type: "you win", payload: { message: "Party finished" } }))
-                clients.get(item2.id).send(JSON.stringify({ type: "you lose", payload: { message: "Party finished" } }))
+                clients.get(item2.id).send(JSON.stringify({ type: "loser", lid:data.lid }))
             }
 
             else if (data.type=="timeout_draw")
@@ -632,7 +636,7 @@ wss.on("connection", (ws) => {
 });
 
 // Start the server
-const PORT = 8000;
+const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
