@@ -16,7 +16,7 @@ class GameCubit extends Cubit<GameState>{
         print('Disconnected from the server.');
         emit(LeaveGame());
       }else if(data=='game start'){
-        
+        print('start game............');
       }
        else {
         handleServerResponse(data);
@@ -41,6 +41,21 @@ class GameCubit extends Cubit<GameState>{
             String img = data['svg'];
             emit(GameReceivePic(svg_img: img ));
           }
+        } else if(data['type']=='wrong_guess'){
+          String wgid = data['id'];
+          if (wgid==uid){
+         emit(WrongResponse());}
+        }else if (data['type']=='player_won'){
+          print('lllllllllllllllllllllllllllllllllllwwwwwwwwwwwwwwwwwwwwwwwwww');
+          print('Player won: ${data['id']}');
+          String wid = data['id'];
+          if (wid==uid){
+            emit(PlayerWon(win: true));
+          }else{
+            emit(PlayerWon(win: false));
+          }
+        }else if (data['type']=='time_finished'){
+          emit(GameOver());
         }
 
     } else {
@@ -67,7 +82,14 @@ class GameCubit extends Cubit<GameState>{
     };
     channel.sink.add(jsonEncode(message));
   }
-
+  
+  void sendTimeout(){
+    final message = {
+      'type':'timeout',
+      
+    };
+    channel.sink.add(jsonEncode(message));
+  }
 
   Future<void> close() {
     print('Closing GameCubit...');

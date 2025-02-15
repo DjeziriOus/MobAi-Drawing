@@ -14,6 +14,15 @@ class GameOver extends GameState {}
 
 class LeaveGame extends GameState {}
 
+class WrongResponse extends GameState {
+  
+}
+
+class PlayerWon extends GameState {
+  final bool win;
+  PlayerWon({required this.win});
+}
+
 class GameErr extends GameState{
   final String err;
 
