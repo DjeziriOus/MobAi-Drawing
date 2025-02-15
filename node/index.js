@@ -91,7 +91,8 @@ wss.on("connection", (ws) => {
             {
                 let item = await Item.findOne({ id:data.id });
 
-                
+                const randomIndex = Math.floor(Math.random() * promptsData.length);
+                const prompt= promptsData[randomIndex];
 
                 if (!item) {
                     item = new Item({ id:data.id, level: 0 });
@@ -103,11 +104,11 @@ wss.on("connection", (ws) => {
                     { available: true }
                 );
 
-                let item2 = await Item.findOne({ level, id: { $ne: data.id } });
+                let item2 = await Item.findOne({ level, id: { $ne: data.id },available:true });
 
                 if (!item2) return;
 
-                let party = await Party.create({ id1: item.id, id2: item2.id });
+                let party = await Party.create({ id1: item.id, id2: item2.id ,prompt});
 
                 const response = JSON.stringify({ type: "1vs_response", party });
                 item.available=false
@@ -124,6 +125,28 @@ wss.on("connection", (ws) => {
                  } // Envoie aussi au deuxième joueur
             }
 
+            else if (data.type=="get_image")
+            {
+                const {image}=data.image
+
+                const imagePath = 'image_recue.png';
+        fs.writeFileSync(imagePath, image);
+        console.log('Image sauvegardée localement.');
+
+        // 📌 Envoi de l'image à FastAPI
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(imagePath));
+
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/upload/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            console.log('Réponse de FastAPI:', response.data);
+            ws.send(JSON.stringify({ type:"ai_guessed" , guess:response.data }))
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi à FastAPI:', error.message);
+        }
+            }
             else if (data.type=="success")
             {
                 let item2 = await Item.findOne({ id: { $ne: data.id } });
