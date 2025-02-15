@@ -1,0 +1,7 @@
+2025-02-15 01:48:00,468 - absl - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-02-15 01:48:00,474 - server - INFO - Model loaded successfully
+2025-02-15 01:48:00,476 - fastapi - ERROR - Form data requires "python-multipart" to be installed. 
+You can install "python-multipart" with: 
+
+pip install python-multipart
+
