@@ -6,7 +6,7 @@ const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
 const fs = require('fs');
 
-
+const sharp = require("sharp");
 const Item = require("./models/Item");
 const Prompt = require("./models/prompt");
 const Party = require("./models/party");
@@ -248,12 +248,13 @@ wss.on("connection", (ws) => {
                 
 
                 const imagePath = 'image_recue.svg';
-        fs.writeFileSync(imagePath, image);
-        console.log('Image sauvegardée localement.');
-
-        // 📌 Envoi de l'image à FastAPI
-        const formData = new FormData();
-        formData.append('file', fs.createReadStream(imagePath));
+        
+                sharp(svgBuffer)
+                .png()
+                .toFile("output.png")
+                .then(async() => {console.log("Conversion terminée !")
+                    const formData = new FormData();
+        formData.append('file', fs.createReadStream("output.png"));
 
         try {
             const response = await axios.post('http://127.0.0.1:8000/predict', formData, {
@@ -264,6 +265,11 @@ wss.on("connection", (ws) => {
         } catch (error) {
             console.error('Erreur lors de l\'envoi à FastAPI:', error.message);
         }
+                })
+                .catch(err => console.error("Erreur :", err));
+
+        // 📌 Envoi de l'image à FastAPI
+        
             }
             else if (data.type=="success")
             {
