@@ -31,12 +31,102 @@ const wss = new WebSocketServer({ server });
 
 // Insert default prompts
 const promptsData = [
-    { prompt: "Helicopter", action: "Medium" },
-    { prompt: "Computer", action: "Hard" },
-    { prompt: "Cat", action: "Easy" },
-    { prompt: "Mountain", action: "Medium" },
-    { prompt: "Robot", action: "Hard" },
-    // ... (other prompts)
+    { prompt: "airplane", action: 1 },
+    { prompt: "alarm clock", action: 2 },
+    { prompt: "ambulance", action: 1 },
+    { prompt: "angel", action: 0 },
+    { prompt: "animal migration", action: 1 },
+    { prompt: "ant", action: 0 },
+    { prompt: "apple", action: 0 },
+    { prompt: "axe", action: 2 },
+    { prompt: "backpack", action: 2 },
+    { prompt: "banana", action: 0 },
+    { prompt: "bandage", action: 2 },
+    { prompt: "barn", action: 1 },
+    { prompt: "baseball bat", action: 2 },
+    { prompt: "basket", action: 2 },
+    { prompt: "bear", action: 0 },
+    { prompt: "bee", action: 0 },
+    { prompt: "bicycle", action: 0 },
+    { prompt: "binoculars", action: 2 },
+    { prompt: "bird", action: 0 },
+    { prompt: "book", action: 2 },
+    { prompt: "boomerang", action: 2 },
+    { prompt: "bottlecap", action: 2 },
+    { prompt: "bowtie", action: 2 },
+    { prompt: "brain", action: 2 },
+    { prompt: "bread", action: 0 },
+    { prompt: "bridge", action: 1 },
+    { prompt: "bus", action: 1 },
+    { prompt: "butterfly", action: 0 },
+    { prompt: "cactus", action: 1 },
+    { prompt: "calculator", action: 2 },
+    { prompt: "calendar", action: 2 },
+    { prompt: "camel", action: 0 },
+    { prompt: "camera", action: 2 },
+    { prompt: "candle", action: 2 },
+    { prompt: "car", action: 1 },
+    { prompt: "castle", action: 1 },
+    { prompt: "cat", action: 0 },
+    { prompt: "ceiling fan", action: 2 },
+    { prompt: "cell phone", action: 2 },
+    { prompt: "chair", action: 2 },
+    { prompt: "church", action: 1 },
+    { prompt: "circle", action: 2 },
+    { prompt: "cloud", action: 1 },
+    { prompt: "coffee cup", action: 2 },
+    { prompt: "compass", action: 2 },
+    { prompt: "computer", action: 2 },
+    { prompt: "cookie", action: 0 },
+    { prompt: "cruise ship", action: 1 },
+    { prompt: "dog", action: 0 },
+    { prompt: "dolphin", action: 0 },
+    { prompt: "door", action: 2 },
+    { prompt: "dragon", action: 0 },
+    { prompt: "drill", action: 2 },
+    { prompt: "drums", action: 2 },
+    { prompt: "duck", action: 0 },
+    { prompt: "elephant", action: 0 },
+    { prompt: "eye", action: 2 },
+    { prompt: "firetruck", action: 1 },
+    { prompt: "fish", action: 0 },
+    { prompt: "flower", action: 0 },
+    { prompt: "giraffe", action: 0 },
+    { prompt: "guitar", action: 2 },
+    { prompt: "hammer", action: 2 },
+    { prompt: "helicopter", action: 1 },
+    { prompt: "hourglass", action: 2 },
+    { prompt: "house", action: 1 },
+    { prompt: "ice cream", action: 0 },
+    { prompt: "key", action: 2 },
+    { prompt: "ladder", action: 2 },
+    { prompt: "lighthouse", action: 1 },
+    { prompt: "lion", action: 0 },
+    { prompt: "moon", action: 1 },
+    { prompt: "motorbike", action: 1 },
+    { prompt: "ocean", action: 1 },
+    { prompt: "pencil", action: 2 },
+    { prompt: "pig", action: 0 },
+    { prompt: "plane", action: 1 },
+    { prompt: "rainbow", action: 1 },
+    { prompt: "scissors", action: 2 },
+    { prompt: "shark", action: 0 },
+    { prompt: "snowflake", action: 1 },
+    { prompt: "star", action: 1 },
+    { prompt: "submarine", action: 1 },
+    { prompt: "sun", action: 1 },
+    { prompt: "telescope", action: 2 },
+    { prompt: "tent", action: 1 },
+    { prompt: "toothbrush", action: 2 },
+    { prompt: "tree", action: 1 },
+    { prompt: "umbrella", action: 2 },
+    { prompt: "violin", action: 2 },
+    { prompt: "volcano", action: 1 },
+    { prompt: "watch", action: 2 },
+    { prompt: "watermelon", action: 0 },
+    { prompt: "wheel", action: 2 },
+    { prompt: "windmill", action: 1 },
+    { prompt: "zebra", action: 0 },
 ];
 async function insertPrompts() {
     try {
@@ -71,22 +161,46 @@ wss.on("connection", (ws) => {
   
 
             if (data.type === "send_data") {
-                const { time, accuracy, action } = data.payload;
-                const id = ws.id || Date.now(); // Assign a unique ID if none exists
+                const { time, accuracy } = data.payload;
+                const id = ws.id || Date.now(); // Assurez-vous que ws.id est bien attribué ailleurs
+            
                 let item = await Item.findOne({ id });
-                
+            
                 if (!item) {
                     item = new Item({ id, level: 0 });
                     await item.save();
                 }
-                
+            
                 let level = item.level;
-                const prompts = await Prompt.find({ action: "Medium" }).select("prompt -_id");
-                const randomIndex = Math.floor(Math.random() * prompts.length);
-                const responseData = { level, prompt: prompts[randomIndex] };
-
-                ws.send(JSON.stringify({ type: "message", payload: responseData }));
+            
+                try {
+                    // Construire un objet JSON à envoyer
+                    const payload = { time, accuracy ,level};
+            
+                    const response = await axios.post("http://127.0.0.1:5000/predict/", payload, {
+                        headers: { "Content-Type": "application/json" },
+                    });
+            
+                    console.log("Réponse de Flask:", response.data);
+                    const prompts = await Prompt.find({ action: response.data.action }).select("prompt -_id");
+                    if (prompts.length === 0) {
+                        console.warn("Aucun prompt trouvé pour l'action 'Medium'.");
+                        ws.send(JSON.stringify({ type: "message", payload: { level, prompt: null } }));
+                        return;
+                    }
+                
+                    const randomIndex = Math.floor(Math.random() * prompts.length);
+                    const responseData = { level:response.data.level, prompt: prompts[randomIndex].prompt };
+                
+                    ws.send(JSON.stringify({ type: "prompt", payload: responseData }));
+                } catch (error) {
+                    console.error("Erreur lors de l'envoi à Flask:", error.message);
+                }
+            
+                // Récupération des prompts et gestion du cas vide
+               
             }
+            
             else if(data.type=="1vs1")
             {
                 let item = await Item.findOne({ id:data.id });
@@ -142,7 +256,7 @@ wss.on("connection", (ws) => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             console.log('Réponse de FastAPI:', response.data);
-            ws.send(JSON.stringify({ type:"ai_guessed" , guess:response.data }))
+            ws.send(JSON.stringify({ type:"ai_guessed" , guess:response.data.guess,accuracy:response.data.accuracy }))
         } catch (error) {
             console.error('Erreur lors de l\'envoi à FastAPI:', error.message);
         }
