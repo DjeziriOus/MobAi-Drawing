@@ -40,6 +40,8 @@ dependencies:
   web_socket_channel: ^3.0.2
   flutter_svg: ^2.0.17
   path_drawing: ^1.0.1
+  animated_text_kit: ^4.2.3
+  rive: ^0.13.20
 
 dev_dependencies:
   flutter_test:

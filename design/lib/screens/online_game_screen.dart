@@ -1,3 +1,4 @@
+// online_game_screen.dart
 import 'dart:async';
 import 'package:design/screens/oneVsOne/logic/oneVsOne_cubit.dart';
 import 'package:design/screens/oneVsOne/logic/oneVsOne_state.dart';
@@ -19,8 +20,7 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
   @override
   void initState() {
     super.initState();
-    // Start timer to send SVG every 2 seconds
-    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (points.isNotEmpty) {
         String svgString = _convertToSVG();
         context.read<OnevsoneCubit>().sendSVG(svgString);
@@ -42,7 +42,6 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
     double maxX = double.negativeInfinity;
     double maxY = double.negativeInfinity;
 
-    // Find bounds
     for (var point in points) {
       if (point != null) {
         minX = point.dx < minX ? point.dx : minX;
@@ -78,21 +77,32 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
           setState(() {
             currentPrompt = state.prompt;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Draw: ${state.prompt}')),
-          );
+          _showSnackBar(context, 'Draw: ${state.prompt}');
         } else if (state is OnevsOneWin) {
           _showGameResult(context, 'You Won!');
         } else if (state is OnevsOneLoss) {
           _showGameResult(context, 'You Lost!');
+        } else if (state is DescriptionState) {
+          print('Showing description: ${state.description}');
+          _showSnackBar(
+            context, 
+            state.description,
+            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.purpleAccent.shade700,
+          );
         }
       },
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Drawing Game'),
+            title: const Text('Drawing Game'),
             actions: [
-              Text('Prompt: $currentPrompt', style: TextStyle(fontSize: 18)),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Prompt: $currentPrompt', 
+                  style: const TextStyle(fontSize: 18)
+                ),
+              ),
             ],
           ),
           body: Column(
@@ -131,7 +141,7 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
                           points.clear();
                         });
                       },
-                      child: Text('Clear'),
+                      child: const Text('Clear'),
                     ),
                   ],
                 ),
@@ -143,20 +153,46 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
     );
   }
 
+  void _showSnackBar(
+    BuildContext context, 
+    String message, {
+    Duration duration = const Duration(seconds: 2),
+    Color? backgroundColor,
+  }) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.info_outline, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        duration: duration,
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
   void _showGameResult(BuildContext context, String message) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Game Over'),
+          title: const Text('Game Over'),
           content: Text(message),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).pop(); // Return to previous screen
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -175,7 +211,7 @@ class DrawingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..color = Colors.black
-      ..strokeWidth = 2.0
+      ..strokeWidth = 7.0
       ..strokeCap = StrokeCap.round;
 
     for (int i = 0; i < points.length - 1; i++) {
@@ -188,3 +224,5 @@ class DrawingPainter extends CustomPainter {
   @override
   bool shouldRepaint(DrawingPainter oldDelegate) => true;
 }
+
+

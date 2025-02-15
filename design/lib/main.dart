@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         '/offline': (context) => const OfflineGameScreen(),
         '/online': (context) => BlocProvider(
               create: (context) =>
-                  OnevsoneCubit("1"), // Replace with actual uid source
+                  OnevsoneCubit("1"),
               child: OnlineGameScreen(),
             ),
         '/multiplayer': (context) => const MultiplayerRoomScreen(),

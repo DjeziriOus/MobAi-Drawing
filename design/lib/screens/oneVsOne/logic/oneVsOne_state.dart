@@ -26,3 +26,10 @@ class OnevsOneErr extends OnevsoneState {
 
   OnevsOneErr({required this.err});
 }
+
+
+class DescriptionState extends OnevsoneState {
+  final String description;
+
+  DescriptionState({required this.description});
+}
