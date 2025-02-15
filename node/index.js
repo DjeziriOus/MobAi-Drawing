@@ -4,7 +4,7 @@ const { WebSocketServer } = require("ws");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
-
+const sharp = require("sharp");
 
 const Item = require("./models/Item");
 const Prompt = require("./models/prompt");
@@ -243,7 +243,7 @@ wss.on("connection", (ws) => {
             {
                 const {image}=data.image
 
-                const imagePath = 'image_recue.png';
+                const imagePath = 'image_recue.svg';
         fs.writeFileSync(imagePath, image);
         console.log('Image sauvegardée localement.');
 
@@ -252,7 +252,7 @@ wss.on("connection", (ws) => {
         formData.append('file', fs.createReadStream(imagePath));
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/upload/', formData, {
+            const response = await axios.post('http://127.0.0.1:8000/predict/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             console.log('Réponse de FastAPI:', response.data);
