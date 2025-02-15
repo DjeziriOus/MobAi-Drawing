@@ -20,7 +20,7 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 8), (timer) {
       if (points.isNotEmpty) {
         String svgString = _convertToSVG();
         context.read<OnevsoneCubit>().sendSVG(svgString);
@@ -84,12 +84,12 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
           _showGameResult(context, 'You Lost!');
         } else if (state is DescriptionState) {
           print('Showing description: ${state.description}');
-          _showSnackBar(
+            _showSnackBar(
             context, 
             state.description,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 2),
             backgroundColor: Colors.purpleAccent.shade700,
-          );
+            );
         }
       },
       builder: (context, state) {
@@ -172,6 +172,7 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
         duration: duration,
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),

@@ -164,9 +164,9 @@ wss.on("connection", (ws) => {
             clients.set(data.id, ws);
   
 
-            if (data.type === "send_data") {
-                const { time, accuracy } = data.payload;
-                const id = ws.id || Date.now(); // Assurez-vous que ws.id est bien attribué ailleurs
+            if (data.type === "start rl") {
+                const {id} = data;
+                
             
                 let item = await Item.findOne({ id });
             
@@ -176,6 +176,8 @@ wss.on("connection", (ws) => {
                 }
             
                 let level = item.level;
+                let time = item.time;
+                let accuracy = item.accuracy;
             
                 try {
                     // Construire un objet JSON à envoyer
@@ -189,12 +191,14 @@ wss.on("connection", (ws) => {
                     const prompts = await Prompt.find({ action: response.data.action }).select("prompt -_id");
                     if (prompts.length === 0) {
                         console.warn("Aucun prompt trouvé pour l'action 'Medium'.");
-                        ws.send(JSON.stringify({ type: "message", payload: { level, prompt: null } }));
+                        ws.send(JSON.stringify({ type: "prompt_start", payload: { level, prompt: null } }));
                         return;
                     }
                 
                     const randomIndex = Math.floor(Math.random() * prompts.length);
                     const responseData = { level:response.data.level, prompt: prompts[randomIndex].prompt };
+                    item.level = response.data.level;
+                    item.save();
                 
                     ws.send(JSON.stringify({ type: "prompt", payload: responseData }));
                 } catch (error) {
@@ -504,7 +508,7 @@ wss.on("connection", (ws) => {
     
                 // Notifier tout le monde que le joueur a trouvé la bonne réponse
                 players.forEach(player => {
-                    if (player.id !== id) {
+                    
                         const playerWs = clients.get(player.id);
                         if (playerWs) {
                             playerWs.send(JSON.stringify({ 
@@ -512,7 +516,7 @@ wss.on("connection", (ws) => {
                                 id:id
                             }));
                         }
-                    }
+                    
                 });
 
                 return

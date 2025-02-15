@@ -1,3 +1,4 @@
+import 'package:design/main.dart';
 import 'package:design/screens/game/logic/game_cubit.dart';
 import 'package:design/screens/game/logic/game_state.dart';
 import 'package:design/utils/socket.dart';
@@ -168,7 +169,7 @@ class _GustsScreenState extends State<GustsScreen> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                // Add logic to start a new game or return to menu
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>const MyApp()));
               },
               icon: const Icon(Icons.replay),
               label: const Text('Play Again'),
@@ -208,7 +209,7 @@ class _GustsScreenState extends State<GustsScreen> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                // Add logic to return to main menu
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>const MyApp()));
               },
               icon: const Icon(Icons.home),
               label: const Text('Return to Menu'),
