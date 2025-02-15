@@ -6,92 +6,167 @@ import 'package:flutter/material.dart';
 class MultipChoice extends StatelessWidget {
   const MultipChoice({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.blue.shade900, Colors.purple.shade800],
-              ),
-            ),
+  void _showRoomDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final TextEditingController roomNameController = TextEditingController();
+        
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
           ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 60),
-                    ModeButton(
-                      icon: Icons.create,
-                      label: 'Create room',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RoomScreen(
-                                      isCreator: true,
-                                    )));
-                      },
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: const Offset(0.0, 10.0),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Enter Room Name',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: roomNameController,
+                  decoration: InputDecoration(
+                    hintText: "Room number",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
-                    const SizedBox(height: 50),
-                    const SizedBox(height: 20),
-                    ModeButton(
-                      icon: Icons.groups,
-                      label: 'Enter Room',
+                    prefixIcon: const Icon(Icons.meeting_room),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            TextEditingController roomNameController =
-                                TextEditingController();
-                            return AlertDialog(
-                              title: Text('Enter Room Name'),
-                              content: TextField(
-                                controller: roomNameController,
-                                decoration:
-                                    InputDecoration(hintText: "Room number"),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: Text('Cancel'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text('Enter'),
-                                  onPressed: () {
-                                    String roomName = roomNameController.text;
-                                    // Handle the room name here
-                                    Navigator.of(context).pop();
-                                     Navigator.push(
+                        final roomName = roomNameController.text.trim();
+                        if (roomName.isNotEmpty) {
+                          Navigator.of(context).pop();
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>  RoomScreen(
-                                      isCreator: false,
-                                      roomID: roomName,
-                                    )));
-
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
+                              builder: (context) => RoomScreen(
+                                isCreator: false,
+                                roomID: roomName,
+                              ),
+                            ),
+                          );
+                        }
                       },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Enter',
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.blue.shade900, Colors.purple.shade800],
+            stops: const [0.2, 0.8],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 60),
+              const Text(
+                'Choose Game Mode',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ModeButton(
+                          icon: Icons.create,
+                          label: 'Create Room',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>  RoomScreen(
+                                  isCreator: true,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 50),
+                        ModeButton(
+                          icon: Icons.groups,
+                          label: 'Enter Room',
+                          onPressed: () => _showRoomDialog(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

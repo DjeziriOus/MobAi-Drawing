@@ -11,6 +11,7 @@ const Item = require("./models/Item");
 const Prompt = require("./models/prompt");
 const Party = require("./models/party");
 const Room = require("./models/room");
+const FormData = require('form-data');
 
 const axios = require('axios');
 
@@ -244,24 +245,32 @@ wss.on("connection", (ws) => {
 
             else if (data.type=="send pic")
             {
-                const image=data.svg
-                
-
-                const imagePath = 'image_recue.svg';
+                const imageBuffer = Buffer.from(data.svg, 'utf-8');
+                const id = data.id 
         
-                sharp(svgBuffer)
-                .png()
-                .toFile("output.png")
+                sharp(imageBuffer)
+        .ensureAlpha() // Ensure the image has an alpha channel (transparency)
+        .extractChannel('alpha') // Extract the alpha channel (transparency mask)
+        .toColourspace('b-w') // Convert transparency into a grayscale image
+        .negate() // Invert the image (to make font white and background black)
+        .resize(28, 28) 
+                .toFile(`${id}.png`)
                 .then(async() => {console.log("Conversion terminée !")
                     const formData = new FormData();
-        formData.append('file', fs.createReadStream("output.png"));
+                    
+                   
+        formData.append('file',fs.createReadStream(`${id}.png`) );
 
         try {
             const response = await axios.post('http://127.0.0.1:8000/predict', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: formData.getHeaders()
             });
             console.log('Réponse de FastAPI:', response.data);
-            ws.send(JSON.stringify({ type:"ai_guessed" , guess:response.data.guess,accuracy:response.data.accuracy }))
+            
+            const predictedClass = response.data.predicted_class;
+            const accuracy = response.data.confidence;
+            
+            ws.send(JSON.stringify({ type: "ai_guessed", guess: predictedClass.toString(), accuracy: accuracy.toString() }))
         } catch (error) {
             console.error('Erreur lors de l\'envoi à FastAPI:', error.message);
         }
